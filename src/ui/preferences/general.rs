@@ -454,8 +454,8 @@ impl App {
                     let list = match dxvk::List::list_downloaded(config.game.dxvk.builds) {
                         Ok(l) => l,
                         Err(e) => {
-                            println!("{}", e);
-                            println!("Failed to list downloaded DXVK versions. Does the folder ~/.local/share/anime-game-launcher/dxvks exist?");
+                            eprintln!("{}", e);
+                            eprintln!("Failed to list downloaded DXVK versions. Does the folder ~/.local/share/anime-game-launcher/dxvks exist?");
                             let empty_version = dxvk::Version{
                                 name: "empty".to_string(),
                                 version: "0".to_string(),
@@ -534,8 +534,8 @@ impl App {
                     let list = match wine::List::list_downloaded(config.game.wine.builds) {
                         Ok(l) => l,
                         Err(e) => {
-                            println!("{}", e);
-                            println!("Failed to list downloaded wine versions. Does the folder ~/.local/share/anime-game-launcher/dxvks exist?");
+                            eprintln!("{}", e);
+                            eprintln!("Failed to list downloaded wine versions. Does the folder ~/.local/share/anime-game-launcher/runners exist?");
                             let empty_files = wine::Files {
                                 wine64: "empty".to_string(),
                                 wineserver: "empty".to_string(),

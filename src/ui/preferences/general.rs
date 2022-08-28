@@ -23,9 +23,9 @@ use crate::ui::components::dxvk_row::DxvkRow;
 use crate::ui::components::wine_group::WineGroup;
 
 /// This structure is used to describe widgets used in application
-/// 
+///
 /// `AppWidgets::try_get` function loads UI file from `.assets/ui/.dist` folder and returns structure with references to its widgets
-/// 
+///
 /// This function does not implement events
 #[derive(Clone, glib::Downgrade)]
 pub struct AppWidgets {
@@ -160,7 +160,7 @@ impl AppWidgets {
 }
 
 /// This enum is used to describe an action inside of this application
-/// 
+///
 /// It may be helpful if you want to add the same event for several widgets, or call an action inside of another action
 #[derive(Debug, Clone, glib::Downgrade)]
 pub enum Actions {
@@ -184,9 +184,9 @@ impl Actions {
 }
 
 /// This enum is used to store some of this application data
-/// 
+///
 /// In this example we store a counter here to know what should we increment or decrement
-/// 
+///
 /// This must implement `Default` trait
 #[derive(Debug, Default)]
 pub struct Values {
@@ -195,14 +195,14 @@ pub struct Values {
 }
 
 /// The main application structure
-/// 
+///
 /// `Default` macro automatically calls `AppWidgets::default`, i.e. loads UI file and reference its widgets
-/// 
+///
 /// `Rc<Cell<Values>>` means this:
 /// - `Rc` addeds ability to reference the same value from various clones of the structure.
 ///   This will guarantee us that inner `Cell<Values>` is the same for all the `App::clone()` values
 /// - `Cell` addeds inner mutability to its value, so we can mutate it even without mutable reference.
-/// 
+///
 /// So we have a shared reference to some value that can be changed without mutable reference.
 /// That's what we need and what we use in `App::update` method
 #[derive(Clone, glib::Downgrade)]
@@ -318,7 +318,7 @@ impl App {
     }
 
     /// Add actions processors
-    /// 
+    ///
     /// Changes will happen in the main thread so you can call `update` method from separate thread
     fn init_actions(self) -> Self {
         let (sender, receiver) = glib::MainContext::channel::<Actions>(glib::PRIORITY_DEFAULT);
@@ -451,8 +451,20 @@ impl App {
                 Actions::UpdateDxvkComboRow => {
                     let model = gtk::StringList::new(&[]);
 
-                    let list = dxvk::List::list_downloaded(config.game.dxvk.builds)
-                        .expect("Failed to list downloaded DXVK versions");
+                    let list = match dxvk::List::list_downloaded(config.game.dxvk.builds) {
+                        Ok(l) => l,
+                        Err(e) => {
+                            println!("{}", e);
+                            println!("Failed to list downloaded DXVK versions. Does the folder ~/.local/share/anime-game-launcher/dxvks exist?");
+                            let empty_version = dxvk::Version{
+                                name: "empty".to_string(),
+                                version: "0".to_string(),
+                                uri: "empty".to_string(),
+                                recommended: false
+                            };
+                            dxvk::List { vanilla: vec![empty_version.clone()], r#async: vec![empty_version] }
+                        }
+                    };
 
                     let mut raw_list = Vec::new();
                     let mut selected = 0;
@@ -460,7 +472,7 @@ impl App {
                     for (i, group) in [list.vanilla, list.r#async].into_iter().enumerate() {
                         for version in group {
                             model.append(format!("{} {}", if i == 0 { "Vanilla" } else { "Async" }, version.version).as_str());
-    
+
                             if let Some(curr) = &config.game.dxvk.selected {
                                 if &version.name == curr {
                                     selected = raw_list.len() as u32;
@@ -519,9 +531,28 @@ impl App {
                 Actions::UpdateWineComboRow => {
                     let model = gtk::StringList::new(&["System"]);
 
-                    let list = wine::List::list_downloaded(config.game.wine.builds)
-                        .expect("Failed to list downloaded wine versions");
-
+                    let list = match wine::List::list_downloaded(config.game.wine.builds) {
+                        Ok(l) => l,
+                        Err(e) => {
+                            println!("{}", e);
+                            println!("Failed to list downloaded wine versions. Does the folder ~/.local/share/anime-game-launcher/dxvks exist?");
+                            let empty_files = wine::Files {
+                                wine64: "empty".to_string(),
+                                wineserver: "empty".to_string(),
+                                wineboot: "empty".to_string(),
+                                winecfg: "empty".to_string(),
+                            };
+                            let empty_version = wine::Version{
+                                family: "empty".to_string(),
+                                name: "empty".to_string(),
+                                title: "empty".to_string(),
+                                uri: "empty".to_string(),
+                                files: empty_files,
+                                recommended: false
+                            };
+                            vec![empty_version]
+                        }
+                    };
                     let mut selected = 0;
 
                     for (i, version) in (&list).into_iter().enumerate() {
@@ -585,7 +616,7 @@ impl App {
     /// Update widgets state by calling some action
     pub fn update(&self, action: Actions) -> Result<(), std::sync::mpsc::SendError<Actions>> {
         let actions = self.actions.take();
-        
+
         let result = match &actions {
             Some(sender) => Ok(sender.send(action)?),
             None => Ok(())
@@ -676,7 +707,7 @@ impl App {
             },
             Patch::Available { version, .. } => {
                 self.widgets.patch_version.set_label(&version.to_string());
-                
+
                 if let Ok(true) = patch.is_applied(&config.game.path) {
                     self.widgets.patch_version.set_css_classes(&["success"]);
                 }

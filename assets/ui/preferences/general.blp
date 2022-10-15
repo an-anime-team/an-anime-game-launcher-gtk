@@ -3,6 +3,62 @@ using Adw 1;
 
 Adw.PreferencesPage page {
     Adw.PreferencesGroup {
+        title: "Appearance";
+
+        Adw.Clamp {
+            styles ["appearance"]
+
+            Gtk.Grid {
+                column-homogeneous: true;
+                column-spacing: 24;
+
+                height-request: 120;
+
+                margin-top: 12;
+                margin-end: 12;
+                margin-bottom: 18;
+                margin-start: 12;
+
+                Gtk.Box {
+                    orientation: vertical;
+
+                    Gtk.ToggleButton {
+                        styles ["flat"]
+
+                        vexpand: true;
+
+                        Gtk.Image {
+                            resource: "/org/app/assets/images/ricardo.jpg";
+                        }
+                    }
+
+                    Gtk.Label {
+                        label: "Modern";
+                    }
+                }
+
+                Gtk.Box {
+                    orientation: vertical;
+
+                    Gtk.ToggleButton {
+                        styles ["flat"]
+
+                        vexpand: true;
+
+                        Gtk.Image {
+                            resource: "/org/app/assets/images/ricardo.jpg";
+                        }
+                    }
+
+                    Gtk.Label {
+                        label: "Classic";
+                    }
+                }
+            }
+        }
+    }
+
+    Adw.PreferencesGroup {
         title: "General";
 
         Adw.ComboRow {

@@ -2,6 +2,7 @@
 <gresources>
   <gresource prefix="/org/app/assets">
     <file compressed="true">images/icon.png</file>
+    <file compressed="true">images/ricardo.jpg</file>
   </gresource>
   <gresource prefix="/org/app/ui">
     <file preprocess="xml-stripblanks" compressed="true" alias="main.ui">ui/.dist/main.ui</file>
